@@ -19,8 +19,8 @@ jobs:
         toolchain: stable
         override: true
     - run: |
-        cargo test --manifest-path testcrate/Cargo.toml
-        cargo test --manifest-path testcrate/Cargo.toml --release
+        cargo test -p testcrate
+        cargo test -p testcrate --release
       name: Run tests
 
   rustfmt:
