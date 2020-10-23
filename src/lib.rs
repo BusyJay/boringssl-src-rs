@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 pub fn source_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("boringssl")
@@ -27,6 +28,42 @@ impl Build {
         self
     }
 
+    fn configure_asm_support(&self, cfg: &mut cmake::Config) {
+        if !env::var("TARGET").unwrap().contains("msvc") {
+            return;
+        }
+        let output = Command::new("cmake")
+            .arg("--version")
+            .output()
+            .expect("Can't find cmake.");
+        let output = String::from_utf8_lossy(&output.stdout);
+        let uptodate = output
+            .split_whitespace()
+            .skip(2)
+            .next()
+            .map_or(false, |version| {
+                let vers: Vec<u32> = match version.split(".").map(|n| n.parse()).collect() {
+                    Ok(v) => v,
+                    Err(_) => return false,
+                };
+                // Visual Studio build with assembly optimizations is broken for older version of cmake
+                vers.len() == 3 && vers[0] >= 3 && vers[1] >= 13
+            });
+        if uptodate {
+            let check_exist = |cmd, arg| {
+                Command::new(cmd)
+                    .arg(arg)
+                    .status()
+                    .map_or(false, |s| s.success())
+            };
+            if check_exist("yasm", "--version") || check_exist("nasm", "-v") {
+                return;
+            }
+        }
+
+        cfg.define("OPENSSL_NO_ASM", "ON");
+    }
+
     pub fn build(&mut self) -> Artifacts {
         let out_dir = self.out_dir.as_ref().expect("OUT_DIR not set");
 
@@ -37,6 +74,7 @@ impl Build {
         fs::create_dir_all(&build_dir).unwrap();
 
         let mut cfg = cmake::Config::new(source_dir());
+        self.configure_asm_support(&mut cfg);
         cfg.out_dir(&out_dir);
         cfg.build_target("ssl").build();
         cfg.build_target("crypto").build();
