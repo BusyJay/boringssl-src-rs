@@ -9,6 +9,7 @@ pub fn source_dir() -> PathBuf {
 
 pub struct Build {
     out_dir: Option<PathBuf>,
+    msvc: bool,
 }
 
 pub struct Artifacts {
@@ -20,6 +21,7 @@ impl Build {
     pub fn new() -> Build {
         Build {
             out_dir: env::var_os("OUT_DIR").map(|s| PathBuf::from(s).join("boringssl-build")),
+            msvc: env::var("TARGET").map_or(false, |t| t.contains("msvc")),
         }
     }
 
@@ -29,9 +31,10 @@ impl Build {
     }
 
     fn configure_asm_support(&self, cfg: &mut cmake::Config) {
-        if !env::var("TARGET").unwrap().contains("msvc") {
+        if !self.msvc {
             return;
         }
+
         let output = Command::new("cmake")
             .arg("--version")
             .output()
@@ -92,7 +95,16 @@ impl Build {
         if lib_dir.exists() {
             fs::remove_dir_all(&lib_dir).unwrap();
         }
-        fs::rename(&build_dir, &lib_dir).unwrap();
+        let from_dir = if self.msvc {
+            let profile = match &*env::var("PROFILE").unwrap() {
+                "bench" | "release" => "Release",
+                _ => "Debug",
+            };
+            build_dir.join(profile)
+        } else {
+            build_dir
+        };
+        fs::rename(&from_dir, &lib_dir).unwrap();
 
         Artifacts {
             root_dir: self.out_dir.clone().unwrap(),
