@@ -29,7 +29,7 @@ impl Build {
 
     pub fn build(&mut self) -> Artifacts {
         let out_dir = self.out_dir.as_ref().expect("OUT_DIR not set");
-        
+
         let build_dir = out_dir.join("build");
         if build_dir.exists() {
             fs::remove_dir_all(&build_dir).unwrap();
@@ -104,7 +104,10 @@ impl Artifacts {
     }
 
     pub fn print_cargo_metadata(&self) {
-        println!("cargo:rustc-link-search=native={}", self.lib_dir().display());
+        println!(
+            "cargo:rustc-link-search=native={}",
+            self.lib_dir().display()
+        );
         for lib in self.libs.iter() {
             println!("cargo:rustc-link-lib=static={}", lib);
         }
