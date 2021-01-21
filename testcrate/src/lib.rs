@@ -1,6 +1,6 @@
 extern crate libc;
 
-use libc::{c_int, c_char};
+use libc::{c_char, c_int};
 
 extern "C" {
     pub fn OpenSSL_version(which: c_int) -> *const c_char;
@@ -8,8 +8,8 @@ extern "C" {
 
 #[cfg(test)]
 mod tests {
-    use std::ffi::{CStr, CString};
     use super::*;
+    use std::ffi::{CStr, CString};
 
     #[test]
     fn version_works() {
