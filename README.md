@@ -6,7 +6,7 @@ This crate is intended to integrate with other build script to build boringssl.
 1. To use the crate, just include it as build-dependency:
 ```toml
 [build-dependencies]
-boringssl-src = "0.1"
+boringssl-src = "0.2"
 ```
 
 2. And then build it in build script:
