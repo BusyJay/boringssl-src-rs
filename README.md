@@ -27,3 +27,8 @@ config.define("OPENSSL_ROOT_DIR", format!("{}", boringssl_artifact.root_dir().di
 ```
 
 Then cmake should be able to find the library by `find_package(OpenSSL)`.
+
+# How and When is boringssl updated?
+
+It's updated periodically. It for now serves as a build dependency for tikv/grpc-rs, so
+whenever grpc updates boringssl, this crate also updates the native dependency.
