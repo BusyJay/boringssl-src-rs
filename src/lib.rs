@@ -96,10 +96,7 @@ impl Build {
             fs::remove_dir_all(&lib_dir).unwrap();
         }
         let from_dir = if self.msvc {
-            let profile = match &*env::var("PROFILE").unwrap() {
-                "bench" | "release" => "Release",
-                _ => "Debug",
-            };
+            let profile = cfg.get_profile();
             build_dir.join(profile)
         } else {
             build_dir
