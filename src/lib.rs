@@ -17,12 +17,19 @@ pub struct Artifacts {
     libs: Vec<String>,
 }
 
-impl Build {
-    pub fn new() -> Build {
+impl Default for Build {
+    #[inline]
+    fn default() -> Build {
         Build {
             out_dir: env::var_os("OUT_DIR").map(|s| PathBuf::from(s).join("boringssl-build")),
             msvc: env::var("TARGET").map_or(false, |t| t.contains("msvc")),
         }
+    }
+}
+
+impl Build {
+    pub fn new() -> Build {
+        Build::default()
     }
 
     pub fn out_dir<P: AsRef<Path>>(&mut self, path: P) -> &mut Build {
@@ -40,18 +47,14 @@ impl Build {
             .output()
             .expect("Can't find cmake.");
         let output = String::from_utf8_lossy(&output.stdout);
-        let uptodate = output
-            .split_whitespace()
-            .skip(2)
-            .next()
-            .map_or(false, |version| {
-                let vers: Vec<u32> = match version.split(".").map(|n| n.parse()).collect() {
-                    Ok(v) => v,
-                    Err(_) => return false,
-                };
-                // Visual Studio build with assembly optimizations is broken for older version of cmake
-                vers.len() == 3 && vers[0] >= 3 && vers[1] >= 13
-            });
+        let uptodate = output.split_whitespace().nth(2).map_or(false, |version| {
+            let vers: Vec<u32> = match version.split('.').map(|n| n.parse()).collect() {
+                Ok(v) => v,
+                Err(_) => return false,
+            };
+            // Visual Studio build with assembly optimizations is broken for older version of cmake
+            vers.len() == 3 && vers[0] >= 3 && vers[1] >= 13
+        });
         if uptodate {
             let check_exist = |cmd, arg| {
                 Command::new(cmd)
