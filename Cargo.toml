@@ -1,6 +1,6 @@
 [package]
 name = "boringssl-src"
-version = "0.5.0+b9232f9"
+version = "0.5.1+b9232f9"
 authors = ["Jay Lee <BusyJayLee@gmail.com>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
@@ -14,6 +14,8 @@ exclude = [
     "boringssl/src/crypto/cipher_extra/test",
     "boringssl/src/crypto/fipsmodule/*.png",
     "boringssl/src/crypto/fipsmodule/policydocs/*",
+    "boringssl/src/crypto/hpke/test-vectors.json",
+    "boringssl/src/ssl/test/*",
     "boringssl/src/third_party/wycheproof_testvectors",
     "boringssl/src/third_party/googletest",
     "testcrate",
