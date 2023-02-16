@@ -1,6 +1,6 @@
 [package]
 name = "boringssl-src"
-version = "0.5.1+b9232f9"
+version = "0.5.2+6195bf8"
 authors = ["Jay Lee <BusyJayLee@gmail.com>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
